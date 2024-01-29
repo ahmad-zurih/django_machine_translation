@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>English to German Translation</title>        
+    <style>
+        .top-nav {
+            background-color: #007bff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .top-nav a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 1em;
+            margin-right: 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .top-nav a:hover {
+            background-color: #0056b3;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 50%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #007bff;
+            font-size: 2em;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .translation-result {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 5px solid #007bff;
+            font-size: 16px;
+        }
+        .subtitle {
+            color: #555;
+            font-size: 1.2em;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 60px); 
+            padding-top: 60px;
+        }
+    </style>    
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="/">Home</a>
+        <a href="/code" id="source-code-link">Source Code</a>
+    </nav>
+    <div class="main-content"> <!-- New wrapper for main content -->
+        <div class="container">
+            <h2>English to German Translation</h2>
+            <p class="subtitle">CAS in NLP Demo Machine Translation System</p>
+            <form method="post" id="translationForm">
+                {% csrf_token %}
+                <textarea name="sentence" rows="4" placeholder="Enter your sentence here...">{{ form.sentence.value }}</textarea>
+            </form>
+            <div id="translationOutput" class="translation-result"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputField = document.querySelector('textarea[name="sentence"]');
+            const outputDiv = document.getElementById('translationOutput');
+    
+            inputField.addEventListener('keyup', function() {
+                const text = inputField.value;
+    
+                if (text.length > 0) {
+                    fetch('/translate/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ 'text': text })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        outputDiv.textContent = data.translation;
+                    });
+                } else {
+                    outputDiv.textContent = '';
+                }
+            });
+    
+            // Function to get CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+    
+</body>
+</html>
